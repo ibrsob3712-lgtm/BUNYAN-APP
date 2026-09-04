@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/database/app_database.dart';
 import '../../core/services/assessment_engine.dart';
-class AssessmentPage extends StatefulWidget{const AssessmentPage({super.key});@override State<AssessmentPage> createState()=>_AssessmentPageState();}
-class _AssessmentPageState extends State<AssessmentPage>{List<Map<String,dynamic>> rows=[];@override void initState(){super.initState();load();}Future<void> load()async{rows=await AppDatabase.instance.query('defects',order:'createdAt DESC');if(mounted)setState((){});}Future<void> assess(Map<String,dynamic>x)async{final r=AssessmentEngine.evaluate(defectType:x['type'],severity:x['severity'],observations:1);await AppDatabase.instance.insert('assessments',{'id':const Uuid().v4(),'defectId':x['id'],'priority':r.priority,'score':r.score,'conditionText':r.rationale,'recommendation':r.nextStep,'createdAt':DateTime.now().toIso8601String()});if(mounted)showDialog(context:context,builder:(c)=>AlertDialog(title:Text('الأولوية: ${r.priority}'),content:Text('المؤشر: ${r.score}/100\n\n${r.rationale}\n\nالخطوة التالية: ${r.nextStep}\n\nالنتيجة أداة دعم وليست حكمًا نهائيًا على سلامة المنشأ.'),actions:[FilledButton(onPressed:()=>Navigator.pop(c),child:const Text('حسنًا'))]));}
-@override Widget build(BuildContext c)=>Scaffold(appBar:AppBar(title:const Text('دعم التقييم')),body:ListView(padding:const EdgeInsets.all(16),children:[const Card(child:Padding(padding:EdgeInsets.all(14),child:Text('يعرض النظام أسباب الأولوية بصورة شفافة وقابلة للمراجعة.')), ...rows.map((x)=>Card(child:ListTile(title:Text('${x['type']} • ${x['severity']}'),subtitle:Text(x['description']),trailing:FilledButton(onPressed:()=>assess(x),child:const Text('تحليل')))))]));}}
+
+class AssessmentPage extends StatefulWidget {
+  const AssessmentPage({super.key});
+  @override State<AssessmentPage> createState() => _AssessmentPageState();
+}
+class _AssessmentPageState extends State<AssessmentPage> {
+  List<Map<String,dynamic>> rows=[];
+  @override void initState(){super.initState();load();}
+  Future<void> load() async { rows=await AppDatabase.instance.query('defects',order:'createdAt DESC'); if(mounted)setState((){}); }
+  Future<void> assess(Map<String,dynamic> x) async {
+    final r=AssessmentEngine.evaluate(defectType:'${x['type']}',severity:'${x['severity']}',observations:1);
+    await AppDatabase.instance.insert('assessments',{'id':const Uuid().v4(),'defectId':x['id'],'priority':r.priority,'score':r.score,'conditionText':r.rationale,'recommendation':r.nextStep,'createdAt':DateTime.now().toIso8601String()});
+    if(!mounted)return;
+    await showDialog<void>(context:context,builder:(dialogContext)=>AlertDialog(title:Text('الأولوية: ${r.priority}'),content:Text('المؤشر: ${r.score}/100\n\n${r.rationale}\n\nالخطوة التالية: ${r.nextStep}\n\nالنتيجة أداة دعم وليست حكمًا نهائيًا على سلامة المنشأ.'),actions:[FilledButton(onPressed:()=>Navigator.pop(dialogContext),child:const Text('حسنًا'))]));
+  }
+  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('دعم التقييم')),body:ListView(padding:const EdgeInsets.all(16),children:[const Card(child:Padding(padding:EdgeInsets.all(14),child:Text('يعرض النظام أسباب الأولوية بصورة شفافة وقابلة للمراجعة.'))),...rows.map((x)=>Card(child:ListTile(title:Text('${x['type']} • ${x['severity']}'),subtitle:Text('${x['description'] ?? ''}'),trailing:FilledButton(onPressed:()=>assess(x),child:const Text('تحليل')))))]));
+}
