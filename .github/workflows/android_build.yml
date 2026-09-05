@@ -23,14 +23,19 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Get dependencies
+        run: flutter pub get
+
       - name: Regenerate Android platform
         run: flutter create --platforms=android .
 
       - name: Remove obsolete Flutter test
         run: rm -f test/widget_test.dart
 
-      - name: Get dependencies
-        run: flutter pub get
+      - name: Update Android compile SDK
+        run: |
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' android/app/build.gradle.kts
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/g' android/app/build.gradle
 
       - name: Analyze project
         run: flutter analyze
