@@ -23,16 +23,17 @@ jobs:
           channel: stable
           cache: false
 
-      - name: Remove obsolete test
-        run: rm -f test/widget_test.dart
-
-      - name: Clean old generated files
+      - name: Remove old generated files
         run: |
           rm -rf build
           rm -rf .dart_tool
+          rm -rf android
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Create fresh Android project
+        run: flutter create --platforms=android .
 
       - name: Analyze project
         run: flutter analyze
