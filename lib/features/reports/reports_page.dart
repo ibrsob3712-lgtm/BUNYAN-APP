@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart' as file_picker;
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -62,28 +61,14 @@ class _ReportsPageState extends State<ReportsPage> {
           build: (context) => [
             pw.Header(
               level: 0,
-              child: pw.Text(
-                'BUNYAN - Inspection Summary',
-              ),
+              child: pw.Text('BUNYAN - Inspection Summary'),
             ),
-            pw.Text(
-              'Generated: ${DateTime.now()}',
-            ),
-            pw.Bullet(
-              text: 'Projects: ${projects.length}',
-            ),
-            pw.Bullet(
-              text: 'Buildings: ${buildings.length}',
-            ),
-            pw.Bullet(
-              text: 'Inspections: ${inspections.length}',
-            ),
-            pw.Bullet(
-              text: 'Defects: ${defects.length}',
-            ),
-            pw.Bullet(
-              text: 'Assessments: ${assessments.length}',
-            ),
+            pw.Text('Generated: ${DateTime.now()}'),
+            pw.Bullet(text: 'Projects: ${projects.length}'),
+            pw.Bullet(text: 'Buildings: ${buildings.length}'),
+            pw.Bullet(text: 'Inspections: ${inspections.length}'),
+            pw.Bullet(text: 'Defects: ${defects.length}'),
+            pw.Bullet(text: 'Assessments: ${assessments.length}'),
             pw.SizedBox(height: 15),
             pw.Text(
               'This document organizes recorded inspection data and '
@@ -106,77 +91,44 @@ class _ReportsPageState extends State<ReportsPage> {
       final backupFile = await BackupService().exportJson();
 
       await Share.shareXFiles(
-        [
-          XFile(backupFile.path),
-        ],
+        [XFile(backupFile.path)],
         text: 'BUNYAN backup file',
       );
     });
   }
 
-  Future<void> restoreBackup() {
-    return _run(() async {
-      final result = await file_picker.FilePicker.pickFiles(
-        type: file_picker.FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (result == null) return;
-
-      final selectedPath = result.files.single.path;
-
-      if (selectedPath == null) return;
-
-      await BackupService().importJson(
-        File(selectedPath),
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'تمت استعادة البيانات بنجاح.',
-            ),
-          ),
-        );
-      }
-    });
+  void restoreBackup() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'ميزة استعادة النسخة الاحتياطية ستتم إضافتها في التحديث القادم.',
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'التقارير والنسخ الاحتياطي',
-        ),
+        title: const Text('التقارير والنسخ الاحتياطي'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
             child: ListTile(
-              leading: const Icon(
-                Icons.picture_as_pdf,
-              ),
-              title: const Text(
-                'إنشاء تقرير PDF',
-              ),
-              subtitle: const Text(
-                'ملخص بيانات المشروع والمعاينات',
-              ),
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text('إنشاء تقرير PDF'),
+              subtitle: const Text('ملخص بيانات المشروع والمعاينات'),
               enabled: !busy,
               onTap: busy ? null : generatePdf,
             ),
           ),
           Card(
             child: ListTile(
-              leading: const Icon(
-                Icons.upload_file,
-              ),
-              title: const Text(
-                'تصدير نسخة احتياطية',
-              ),
+              leading: const Icon(Icons.upload_file),
+              title: const Text('تصدير نسخة احتياطية'),
               subtitle: const Text(
                 'إنشاء ملف JSON قابل للمشاركة والحفظ',
               ),
@@ -186,14 +138,10 @@ class _ReportsPageState extends State<ReportsPage> {
           ),
           Card(
             child: ListTile(
-              leading: const Icon(
-                Icons.restore,
-              ),
-              title: const Text(
-                'استعادة نسخة احتياطية',
-              ),
+              leading: const Icon(Icons.restore),
+              title: const Text('استعادة نسخة احتياطية'),
               subtitle: const Text(
-                'استيراد ملف JSON من الهاتف',
+                'سيتم توفير اختيار ملف النسخة الاحتياطية لاحقًا',
               ),
               enabled: !busy,
               onTap: busy ? null : restoreBackup,
