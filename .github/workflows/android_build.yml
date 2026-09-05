@@ -23,20 +23,16 @@ jobs:
           channel: stable
           cache: false
 
-      - name: Remove old Android files
+      - name: Remove obsolete test
+        run: rm -f test/widget_test.dart
+
+      - name: Clean old generated files
         run: |
-          rm -rf android
           rm -rf build
           rm -rf .dart_tool
 
       - name: Get dependencies
         run: flutter pub get
-
-      - name: Create fresh Android platform
-        run: flutter create --platforms=android .
-
-      - name: Remove obsolete widget test
-        run: rm -f test/widget_test.dart
 
       - name: Analyze project
         run: flutter analyze
@@ -49,3 +45,4 @@ jobs:
         with:
           name: BUNYAN-Release-APK
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
